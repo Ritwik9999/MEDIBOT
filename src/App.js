@@ -3,6 +3,7 @@ import Sidebar from "./components/Sidebar";
 import ChatWindow from "./components/ChatWindow";
 import PatientPanel from "./components/PatientPanel";
 import "./App.css";
+import LandingPage from "./LandingPage";
 
 function App() {
   const [messages, setMessages] = useState([
@@ -11,6 +12,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [patient, setPatient] = useState({ name: "", age: "", gender: "" });
   const [severity, setSeverity] = useState("normal");
+  const [started, setStarted] = useState(false);
 
   const sendMessage = async (input) => {
     if (!input.trim() || loading) return;
@@ -41,6 +43,10 @@ function App() {
     setLoading(false);
   };
 
+  if (!started) {
+    return <LandingPage onStart={() => setStarted(true)} />;
+  }
+  
   return (
     <div className="app-container">
       <Sidebar />
