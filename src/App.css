@@ -45,3 +45,20 @@ input:focus, select:focus {
   border-color: #0d6efd !important;
   box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
 }
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+    height: auto;
+    overflow: auto;
+  }
+}
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100% !important;
+    min-height: auto !important;
+    flex-direction: row !important;
+    padding: 12px !important;
+    overflow-x: auto;
+  }
+}

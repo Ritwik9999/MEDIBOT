@@ -1,6 +1,6 @@
 function Sidebar() {
   return (
-    <div style={{
+    <div className="sidebar" style={{
       width: 220, minHeight: "100vh", background: "#0a1628",
       display: "flex", flexDirection: "column", padding: "24px 0",
       boxShadow: "2px 0 10px rgba(0,0,0,0.3)", flexShrink: 0
@@ -25,7 +25,6 @@ function Sidebar() {
             display: "flex", alignItems: "center", gap: 12,
             padding: "10px 12px", borderRadius: 8, marginBottom: 4,
             color: "#cce0ff", fontSize: 13, cursor: "pointer",
-            transition: "background 0.2s"
           }}
             onMouseEnter={e => e.currentTarget.style.background = "#1e3a5f"}
             onMouseLeave={e => e.currentTarget.style.background = "transparent"}
@@ -35,7 +34,6 @@ function Sidebar() {
           </div>
         ))}
 
-        {/* Quick Symptoms */}
         <div style={{ color: "#7aa3cc", fontSize: 10, fontWeight: "bold", letterSpacing: 1, marginTop: 24, marginBottom: 12 }}>QUICK SYMPTOMS</div>
         {["🤒 Fever", "🤕 Headache", "😮‍💨 Breathing", "🤢 Nausea", "💔 Chest Pain"].map((s) => (
           <div key={s} style={{
@@ -49,7 +47,6 @@ function Sidebar() {
         ))}
       </div>
 
-      {/* Footer */}
       <div style={{ padding: "16px 24px", borderTop: "1px solid #1e3a5f" }}>
         <div style={{ color: "#7aa3cc", fontSize: 10 }}>⚕️ MediBot v2.0</div>
         <div style={{ color: "#4a6a8a", fontSize: 9, marginTop: 2 }}>Powered by LLaMA 3.3</div>
