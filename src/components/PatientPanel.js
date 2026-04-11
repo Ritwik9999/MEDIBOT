@@ -7,7 +7,7 @@ function PatientPanel({ patient, setPatient, severity }) {
   const s = severityData[severity] || severityData.normal;
 
   return (
-    <div style={{ width: 280, minHeight: "100vh", background: "#fff", borderLeft: "1px solid #e0e0e0", padding: 24, display: "flex", flexDirection: "column", gap: 24, flexShrink: 0, overflowY: "auto" }}>
+    <div className="patient-panel" style={{ width: 280, minHeight: "100vh", background: "#fff", borderLeft: "1px solid #e0e0e0", padding: 24, display: "flex", flexDirection: "column", gap: 24, flexShrink: 0, overflowY: "auto" }}>
 
       {/* Patient Info */}
       <div>

@@ -7,7 +7,6 @@
 
 body {
   background: #f0f4ff;
-  overflow: hidden;
 }
 
 .app-container {
@@ -18,16 +17,9 @@ body {
 }
 
 /* Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #f0f4ff;
-}
-::-webkit-scrollbar-thumb {
-  background: #0d6efd;
-  border-radius: 3px;
-}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f0f4ff; }
+::-webkit-scrollbar-thumb { background: #0d6efd; border-radius: 3px; }
 
 /* Animations */
 @keyframes bounce {
@@ -40,25 +32,36 @@ body {
   50% { opacity: 0.6; }
 }
 
-/* Input focus */
 input:focus, select:focus {
   border-color: #0d6efd !important;
   box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
 }
-/* Mobile Responsive */
+
+/* TABLET (768px - 1024px) */
+@media (max-width: 1024px) {
+  .patient-panel {
+    display: none !important;
+  }
+}
+
+/* MOBILE (max 768px) */
 @media (max-width: 768px) {
   .app-container {
     flex-direction: column;
-    height: auto;
-    overflow: auto;
+    height: 100vh;
+    overflow: hidden;
   }
-}
-@media (max-width: 768px) {
+
   .sidebar {
     width: 100% !important;
     min-height: auto !important;
     flex-direction: row !important;
-    padding: 12px !important;
+    padding: 8px 12px !important;
     overflow-x: auto;
+    align-items: center;
+  }
+
+  .patient-panel {
+    display: none !important;
   }
 }
