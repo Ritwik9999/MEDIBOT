@@ -1,4 +1,4 @@
-function Sidebar() {
+function Sidebar({ onNav, onSymptom, activeNav }) {
   return (
     <div className="sidebar" style={{
       width: 220, minHeight: "100vh", background: "#0a1628",
@@ -21,29 +21,47 @@ function Sidebar() {
           { icon: "💊", label: "Medications" },
           { icon: "🚨", label: "Emergency" },
         ].map((item) => (
-          <div key={item.label} style={{
-            display: "flex", alignItems: "center", gap: 12,
-            padding: "10px 12px", borderRadius: 8, marginBottom: 4,
-            color: "#cce0ff", fontSize: 13, cursor: "pointer",
-          }}
+          <div key={item.label}
+            onClick={() => onNav(item.label)}
+            style={{
+              display: "flex", alignItems: "center", gap: 12,
+              padding: "10px 12px", borderRadius: 8, marginBottom: 4,
+              color: activeNav === item.label ? "#fff" : "#cce0ff",
+              fontSize: 13, cursor: "pointer",
+              background: activeNav === item.label ? "#1e3a5f" : "transparent",
+              border: activeNav === item.label ? "1px solid #0d6efd" : "1px solid transparent",
+              transition: "all 0.2s"
+            }}
             onMouseEnter={e => e.currentTarget.style.background = "#1e3a5f"}
-            onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+            onMouseLeave={e => e.currentTarget.style.background = activeNav === item.label ? "#1e3a5f" : "transparent"}
           >
             <span>{item.icon}</span>
             <span>{item.label}</span>
           </div>
         ))}
 
+        {/* Quick Symptoms */}
         <div style={{ color: "#7aa3cc", fontSize: 10, fontWeight: "bold", letterSpacing: 1, marginTop: 24, marginBottom: 12 }}>QUICK SYMPTOMS</div>
-        {["🤒 Fever", "🤕 Headache", "😮‍💨 Breathing", "🤢 Nausea", "💔 Chest Pain"].map((s) => (
-          <div key={s} style={{
-            padding: "7px 12px", borderRadius: 6, marginBottom: 4,
-            color: "#7aa3cc", fontSize: 12, cursor: "pointer",
-            border: "1px solid #1e3a5f"
-          }}
-            onMouseEnter={e => e.currentTarget.style.background = "#1e3a5f"}
-            onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-          >{s}</div>
+        {[
+          { emoji: "🤒", label: "Fever" },
+          { emoji: "🤕", label: "Headache" },
+          { emoji: "😮‍💨", label: "Breathing" },
+          { emoji: "🤢", label: "Nausea" },
+          { emoji: "💔", label: "Chest Pain" },
+        ].map((s) => (
+          <div key={s.label}
+            onClick={() => onSymptom(s.label)}
+            style={{
+              padding: "7px 12px", borderRadius: 6, marginBottom: 4,
+              color: "#7aa3cc", fontSize: 12, cursor: "pointer",
+              border: "1px solid #1e3a5f", display: "flex", alignItems: "center", gap: 8,
+              transition: "all 0.2s"
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#1e3a5f"; e.currentTarget.style.color = "#fff"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#7aa3cc"; }}
+          >
+            <span>{s.emoji}</span><span>{s.label}</span>
+          </div>
         ))}
       </div>
 
