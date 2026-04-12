@@ -71,7 +71,7 @@ function App() {
 
   return (
     <div className="app-container">
-      <Sidebar onNav={handleNav} onSymptom={handleSymptom} activeNav={activeNav} />
+    {window.innerWidth > 768 && <Sidebar onNav={handleNav} onSymptom={handleSymptom} activeNav={activeNav} />}
       <ChatWindow messages={messages} loading={loading} onSend={sendMessage} severity={severity} />
       <PatientPanel patient={patient} setPatient={setPatient} severity={severity} />
     </div>
