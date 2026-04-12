@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 
 function ChatWindow({ messages, loading, onSend, severity }) {
   const [input, setInput] = useState("");
+  const [isMobileMode, setIsMobileMode] = useState(true);
   const bottomRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -9,28 +10,38 @@ function ChatWindow({ messages, loading, onSend, severity }) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // ✅ Fix for Android keyboard pushing layout
+  // ✅ Visual viewport fix for Android
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {
-        containerRef.current.style.height = `${window.visualViewport?.height || window.innerHeight}px`;
+        const height = window.visualViewport?.height || window.innerHeight;
+        containerRef.current.style.height = `${height}px`;
       }
     };
-
     window.visualViewport?.addEventListener("resize", handleResize);
-    window.visualViewport?.addEventListener("scroll", handleResize);
     handleResize();
-
-    return () => {
-      window.visualViewport?.removeEventListener("resize", handleResize);
-      window.visualViewport?.removeEventListener("scroll", handleResize);
-    };
+    return () => window.visualViewport?.removeEventListener("resize", handleResize);
   }, []);
 
   const handleSend = () => {
     if (!input.trim()) return;
     onSend(input);
     setInput("");
+  };
+
+  // ✅ Toggle desktop/mobile mode
+  const toggleMode = () => {
+    if (isMobileMode) {
+      // Switch to desktop mode
+      const meta = document.querySelector("meta[name=viewport]");
+      meta.setAttribute("content", "width=1024");
+      setIsMobileMode(false);
+    } else {
+      // Switch back to mobile mode
+      const meta = document.querySelector("meta[name=viewport]");
+      meta.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content");
+      setIsMobileMode(true);
+    }
   };
 
   return (
@@ -54,6 +65,27 @@ function ChatWindow({ messages, loading, onSend, severity }) {
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <div style={{ background: "#28a745", borderRadius: 20, padding: "3px 10px", color: "#fff", fontSize: 11, fontWeight: "bold" }}>● Live</div>
+
+          {/* ✅ Desktop/Mobile Toggle Button */}
+          <button
+            onClick={toggleMode}
+            title={isMobileMode ? "Switch to Desktop Mode" : "Switch to Mobile Mode"}
+            style={{
+              background: isMobileMode ? "rgba(255,255,255,0.2)" : "#fff",
+              border: "1px solid rgba(255,255,255,0.5)",
+              borderRadius: 20,
+              padding: "3px 10px",
+              color: isMobileMode ? "#fff" : "#0d6efd",
+              fontSize: 11,
+              fontWeight: "bold",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 4
+            }}>
+            {isMobileMode ? "🖥️ Desktop" : "📱 Mobile"}
+          </button>
+
           {severity === "critical" && (
             <div style={{ background: "#dc3545", borderRadius: 20, padding: "3px 10px", color: "#fff", fontSize: 11, fontWeight: "bold" }}>🚨 SOS</div>
           )}
@@ -126,7 +158,10 @@ function ChatWindow({ messages, loading, onSend, severity }) {
         padding: "12px 16px",
         borderTop: "1px solid #e0e0e0",
         boxShadow: "0 -2px 10px rgba(0,0,0,0.05)",
-        flexShrink: 0
+        flexShrink: 0,
+        position: "sticky",
+        bottom: 0,
+        zIndex: 10
       }}>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <input
