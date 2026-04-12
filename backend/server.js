@@ -10,6 +10,41 @@ app.use(express.json());
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
+// ✅ Multi-Model Routing
+function selectModel(messages) {
+  const lastMessage = messages
+    .filter(m => m.role === 'user')
+    .slice(-1)[0]?.content?.toLowerCase() || '';
+
+  // Emergency keywords → most powerful model
+  const emergencyKeywords = [
+    'chest pain', 'heart attack', 'stroke', 'breathing',
+    'emergency', 'unconscious', 'bleeding', 'suicide',
+    'overdose', 'seizure', 'severe', 'critical', '112'
+  ];
+
+  // General symptom keywords → medium model
+  const symptomKeywords = [
+    'fever', 'headache', 'cough', 'cold', 'pain',
+    'diarrhea', 'vomit', 'nausea', 'rash', 'allergy',
+    'diabetes', 'blood pressure', 'infection', 'injury'
+  ];
+
+  const isEmergency = emergencyKeywords.some(k => lastMessage.includes(k));
+  const isSymptom = symptomKeywords.some(k => lastMessage.includes(k));
+
+  if (isEmergency) {
+    console.log('🚨 Using LLaMA 3.3 70b — Emergency case');
+    return 'llama-3.3-70b-versatile';
+  } else if (isSymptom) {
+    console.log('🏥 Using LLaMA 3.1 8b — Symptom case');
+    return 'llama-3.1-8b-instant';
+  } else {
+    console.log('💬 Using Gemma 2 9b — General case');
+    return 'gemma2-9b-it';
+  }
+}
+
 const SYSTEM_PROMPT = `You are MediBot, a helpful and caring healthcare assistant.
 Your job is to:
 1. Warmly greet the patient and ask about their symptoms
@@ -37,14 +72,17 @@ app.post('/chat', async (req, res) => {
       .filter(m => m.role === 'user')
       .slice(-1)[0]?.content || '';
 
-    // Retrieve relevant WHO guidelines
+    // ✅ Select best model based on message
+    const selectedModel = selectModel(messages);
+
+    // ✅ Retrieve relevant WHO guidelines
     const ragContext = buildRAGContext(lastUserMessage);
 
     // Inject RAG context into system prompt
     const enhancedSystemPrompt = SYSTEM_PROMPT + ragContext;
 
     const response = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: selectedModel,
       messages: [
         { role: 'system', content: enhancedSystemPrompt },
         ...messages
@@ -54,9 +92,10 @@ app.post('/chat', async (req, res) => {
 
     const reply = response.choices[0].message.content;
 
-    // Send reply + whether RAG was used (for frontend badge)
-    res.json({ 
+    // ✅ Send reply + model used + WHO guidelines info
+    res.json({
       reply,
+      modelUsed: selectedModel,
       whoGuidelinesUsed: ragContext.length > 0
     });
 
@@ -74,5 +113,5 @@ setInterval(() => {
 }, 840000);
 
 app.listen(5000, () => {
-  console.log('✅ MediBot backend running with RAG on http://localhost:5000');
+  console.log('✅ MediBot backend running with Multi-Model AI + RAG');
 });
