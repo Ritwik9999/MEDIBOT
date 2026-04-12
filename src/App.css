@@ -7,11 +7,12 @@
 
 body {
   background: #f0f4ff;
+  overflow: hidden;
 }
 
 .app-container {
   display: flex;
-  height: 100vh;
+  height: 100dvh;        /* ✅ dvh instead of vh */
   width: 100vw;
   overflow: hidden;
 }
@@ -48,7 +49,7 @@ input:focus, select:focus {
 @media (max-width: 768px) {
   .app-container {
     flex-direction: column;
-    height: 100vh;
+    height: 100dvh;       /* ✅ dvh shrinks when keyboard opens */
     overflow: hidden;
   }
 
@@ -63,21 +64,5 @@ input:focus, select:focus {
 
   .patient-panel {
     display: none !important;
-  }
-}
-/* Mobile Keyboard Fix */
-@media (max-width: 768px) {
-  .app-container {
-    height: 100%;
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-  }
-
-  body {
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    overflow: hidden;
-    position: fixed;
-    width: 100%;
   }
 }
