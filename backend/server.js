@@ -41,7 +41,7 @@ function selectModel(messages) {
     return 'llama-3.1-8b-instant';
   } else {
     console.log('💬 Using Gemma 2 9b — General case');
-    return 'gemma2-9b-it';
+   return 'llama-3.1-8b-instant';
   }
 }
 
