@@ -1,0 +1,62 @@
+[
+  {
+    "id": "fever-1",
+    "topic": "Fever",
+    "content": "Fever is a temporary rise in body temperature. WHO guidelines: Adults with fever above 38.5°C should rest and stay hydrated. Use paracetamol or ibuprofen to reduce fever. Seek medical help if fever exceeds 39.5°C, lasts more than 3 days, or is accompanied by severe headache, stiff neck, or rash."
+  },
+  {
+    "id": "chest-pain-1",
+    "topic": "Chest Pain",
+    "content": "WHO emergency guidelines: Chest pain can indicate a heart attack. Symptoms include pressure or squeezing in chest, pain spreading to arm or jaw, shortness of breath, sweating, nausea. IMMEDIATELY call emergency services (112). Do not drive yourself. If available and not allergic, chew 300mg aspirin while waiting for help."
+  },
+  {
+    "id": "respiratory-1",
+    "topic": "Respiratory Infection",
+    "content": "WHO guidelines for respiratory infections: Rest and drink plenty of fluids. Use honey for soothing cough in adults. Seek care if breathing difficulty, chest pain, confusion, or persistent high fever occurs. Antibiotics are not effective against viral infections."
+  },
+  {
+    "id": "diarrhea-1",
+    "topic": "Diarrhea",
+    "content": "WHO oral rehydration therapy: Mix 1 liter clean water with 6 teaspoons sugar and half teaspoon salt. Drink frequently to prevent dehydration. Seek medical help if diarrhea lasts more than 3 days, blood in stool, signs of dehydration like dry mouth or no urination, or high fever."
+  },
+  {
+    "id": "headache-1",
+    "topic": "Headache",
+    "content": "WHO guidelines for headache: Most headaches are tension-type or migraine. Rest in a quiet dark room. Stay hydrated. Use paracetamol or ibuprofen. Seek emergency care immediately for sudden severe headache, headache with fever and stiff neck, headache after head injury, or headache with vision changes or weakness."
+  },
+  {
+    "id": "diabetes-1",
+    "topic": "Diabetes",
+    "content": "WHO diabetes guidelines: Monitor blood glucose regularly. Maintain healthy diet low in sugar and processed foods. Exercise at least 150 minutes per week. Take prescribed medications consistently. Watch for hypoglycemia symptoms: sweating, trembling, confusion. If blood sugar very low, consume fast-acting sugar immediately."
+  },
+  {
+    "id": "hypertension-1",
+    "topic": "High Blood Pressure",
+    "content": "WHO hypertension guidelines: Normal blood pressure is below 120/80 mmHg. Reduce salt intake to less than 5g per day. Exercise regularly. Avoid tobacco and limit alcohol. Take prescribed medications daily. Seek emergency care for blood pressure above 180/120 with symptoms like chest pain or shortness of breath."
+  },
+  {
+    "id": "wound-1",
+    "topic": "Wound and Bleeding",
+    "content": "WHO first aid for wounds: Apply direct pressure with clean cloth to stop bleeding. Clean wound with clean running water. Apply antiseptic if available. Cover with clean bandage. Seek medical care if bleeding does not stop after 10 minutes, wound is deep or gaping, caused by animal bite, or signs of infection like redness and pus appear."
+  },
+  {
+    "id": "allergy-1",
+    "topic": "Allergic Reaction",
+    "content": "WHO guidelines for allergic reactions: Mild reactions include rash, itching, runny nose. Use antihistamines for mild symptoms. Severe anaphylaxis symptoms include throat swelling, difficulty breathing, drop in blood pressure. IMMEDIATELY call emergency services for anaphylaxis. Use epinephrine auto-injector if available. Lie down with legs elevated."
+  },
+  {
+    "id": "stroke-1",
+    "topic": "Stroke",
+    "content": "WHO stroke guidelines: Use FAST test - Face drooping, Arm weakness, Speech difficulty, Time to call emergency. IMMEDIATELY call 112 for any stroke symptoms. Do not give food or water. Note the time symptoms started. Stroke is a medical emergency - every minute counts. Do not wait to see if symptoms improve."
+  },
+  {
+    "id": "covid-1",
+    "topic": "COVID-19",
+    "content": "WHO COVID-19 guidelines: Common symptoms include fever, dry cough, fatigue, loss of taste or smell. Isolate if symptomatic. Rest and stay hydrated. Seek emergency care for difficulty breathing, persistent chest pain, confusion, or bluish lips. High risk groups include elderly and those with underlying conditions."
+  },
+  {
+    "id": "mental-health-1",
+    "topic": "Mental Health",
+    "content": "WHO mental health guidelines: Mental health conditions are common and treatable. Anxiety and depression are the most prevalent. Seek professional help if symptoms persist more than 2 weeks. Self-care includes regular sleep, exercise, social connection, and limiting alcohol. Crisis support is available 24/7 through helplines. Never ignore suicidal thoughts - seek help immediately."
+  }
+]
