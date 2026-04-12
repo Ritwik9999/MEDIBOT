@@ -3,10 +3,29 @@ import { useState, useRef, useEffect } from "react";
 function ChatWindow({ messages, loading, onSend, severity }) {
   const [input, setInput] = useState("");
   const bottomRef = useRef(null);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // ✅ Fix for Android keyboard pushing layout
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        containerRef.current.style.height = `${window.visualViewport?.height || window.innerHeight}px`;
+      }
+    };
+
+    window.visualViewport?.addEventListener("resize", handleResize);
+    window.visualViewport?.addEventListener("scroll", handleResize);
+    handleResize();
+
+    return () => {
+      window.visualViewport?.removeEventListener("resize", handleResize);
+      window.visualViewport?.removeEventListener("scroll", handleResize);
+    };
+  }, []);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -15,14 +34,15 @@ function ChatWindow({ messages, loading, onSend, severity }) {
   };
 
   return (
-    <div className="chat-window" style={{
+    <div ref={containerRef} className="chat-window" style={{
       flex: 1,
       display: "flex",
       flexDirection: "column",
       height: "100dvh",
       maxHeight: "100dvh",
       background: "#f0f4ff",
-      overflow: "hidden"
+      overflow: "hidden",
+      position: "relative"
     }}>
 
       {/* Header */}
@@ -55,7 +75,7 @@ function ChatWindow({ messages, loading, onSend, severity }) {
         display: "flex",
         flexDirection: "column",
         gap: 16,
-        paddingBottom: "70px", /* ✅ space for mobile bottom nav */
+        paddingBottom: "16px",
         WebkitOverflowScrolling: "touch",
         overflowAnchor: "none",
       }}>
@@ -128,17 +148,13 @@ function ChatWindow({ messages, loading, onSend, severity }) {
         </div>
       </div>
 
-      {/* ✅ Mobile Bottom Nav */}
+      {/* Mobile Bottom Nav */}
       <div className="mobile-nav" style={{
         display: "none",
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
         background: "#0a1628",
         padding: "8px 0",
-        zIndex: 100,
         borderTop: "1px solid #1e3a5f",
+        flexShrink: 0
       }}>
         {[
           { icon: "💬", label: "New Chat" },
