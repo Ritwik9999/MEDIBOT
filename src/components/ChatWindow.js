@@ -56,7 +56,8 @@ function ChatWindow({ messages, loading, onSend, severity }) {
         flexDirection: "column",
         gap: 16,
         paddingBottom: "70px", /* ✅ space for mobile bottom nav */
-        WebkitOverflowScrolling: "touch"
+        WebkitOverflowScrolling: "touch",
+        overflowAnchor: "none",
       }}>
         {messages.map((msg, i) => (
           <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start", alignItems: "flex-end", gap: 8 }}>
