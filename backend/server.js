@@ -10,38 +10,49 @@ app.use(express.json());
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-// ✅ Multi-Model Routing
+// ✅ Updated Multi-Model Routing with GPT-OSS 120B
 function selectModel(messages) {
   const lastMessage = messages
     .filter(m => m.role === 'user')
     .slice(-1)[0]?.content?.toLowerCase() || '';
 
-  // Emergency keywords → most powerful model
+  // Emergency keywords → GPT-OSS 120B (most powerful)
   const emergencyKeywords = [
     'chest pain', 'heart attack', 'stroke', 'breathing',
     'emergency', 'unconscious', 'bleeding', 'suicide',
     'overdose', 'seizure', 'severe', 'critical', '112'
   ];
 
-  // General symptom keywords → medium model
+  // Complex symptom keywords → LLaMA 3.3 70b
+  const complexKeywords = [
+    'diabetes', 'blood pressure', 'hypertension', 'cancer',
+    'infection', 'chronic', 'diagnosis', 'treatment', 'surgery',
+    'medication', 'prescription', 'allergy', 'reaction'
+  ];
+
+  // General symptom keywords → Qwen3 32B
   const symptomKeywords = [
     'fever', 'headache', 'cough', 'cold', 'pain',
-    'diarrhea', 'vomit', 'nausea', 'rash', 'allergy',
-    'diabetes', 'blood pressure', 'infection', 'injury'
+    'diarrhea', 'vomit', 'nausea', 'rash', 'tired',
+    'fatigue', 'injury', 'wound', 'swelling', 'ache'
   ];
 
   const isEmergency = emergencyKeywords.some(k => lastMessage.includes(k));
+  const isComplex = complexKeywords.some(k => lastMessage.includes(k));
   const isSymptom = symptomKeywords.some(k => lastMessage.includes(k));
 
   if (isEmergency) {
-    console.log('🚨 Using LLaMA 3.3 70b — Emergency case');
+    console.log('🚨 Using GPT-OSS 120B — Emergency case');
+    return 'openai/gpt-oss-120b';
+  } else if (isComplex) {
+    console.log('🏥 Using LLaMA 3.3 70b — Complex case');
     return 'llama-3.3-70b-versatile';
   } else if (isSymptom) {
-    console.log('🏥 Using LLaMA 3.1 8b — Symptom case');
-    return 'llama-3.1-8b-instant';
+    console.log('🧠 Using Qwen3 32B — Symptom case');
+    return 'qwen-qwq-32b';
   } else {
-    console.log('💬 Using Gemma 2 9b — General case');
-   return 'llama-3.1-8b-instant';
+    console.log('💬 Using LLaMA 3.1 8b — General case');
+    return 'llama-3.1-8b-instant';
   }
 }
 
@@ -92,7 +103,6 @@ app.post('/chat', async (req, res) => {
 
     const reply = response.choices[0].message.content;
 
-    // ✅ Send reply + model used + WHO guidelines info
     res.json({
       reply,
       modelUsed: selectedModel,
@@ -101,7 +111,20 @@ app.post('/chat', async (req, res) => {
 
   } catch (error) {
     console.error('Error:', error.message);
-    res.status(500).json({ error: 'Something went wrong. Please try again.' });
+    // ✅ Fallback to LLaMA if any model fails
+    try {
+      const fallbackResponse = await groq.chat.completions.create({
+        model: 'llama-3.1-8b-instant',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...req.body.messages
+        ],
+        max_tokens: 500,
+      });
+      res.json({ reply: fallbackResponse.choices[0].message.content });
+    } catch (fallbackError) {
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
+    }
   }
 });
 
@@ -113,5 +136,5 @@ setInterval(() => {
 }, 840000);
 
 app.listen(5000, () => {
-  console.log('✅ MediBot backend running with Multi-Model AI + RAG');
+  console.log('✅ MediBot backend running with GPT-OSS 120B + Multi-Model AI + RAG');
 });
