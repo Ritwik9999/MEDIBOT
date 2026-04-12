@@ -1,4 +1,8 @@
 function Sidebar({ onNav, onSymptom, activeNav }) {
+  // ✅ Hide on mobile using JS check
+  const isMobile = window.innerWidth <= 768;
+  if (isMobile) return null;
+
   return (
     <div className="sidebar" style={{
       width: 220, minHeight: "100vh", background: "#0a1628",
