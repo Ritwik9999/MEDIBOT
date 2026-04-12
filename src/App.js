@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import ChatWindow from "./components/ChatWindow";
 import PatientPanel from "./components/PatientPanel";
@@ -14,6 +14,17 @@ function App() {
   const [severity, setSeverity] = useState("normal");
   const [started, setStarted] = useState(false);
   const [activeNav, setActiveNav] = useState("New Consultation");
+  const [isMobile, setIsMobile] = useState(false);
+
+  // ✅ Reliable mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 900 || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent));
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const sendMessage = async (input) => {
     if (!input.trim() || loading) return;
@@ -44,7 +55,6 @@ function App() {
     setLoading(false);
   };
 
-  // ✅ Handle nav clicks
   const handleNav = (label) => {
     setActiveNav(label);
     if (label === "New Consultation") {
@@ -59,7 +69,6 @@ function App() {
     }
   };
 
-  // ✅ Handle quick symptom clicks
   const handleSymptom = (symptom) => {
     const clean = symptom.replace(/[^\w\s]/g, "").trim();
     sendMessage(`I have ${clean}`);
@@ -71,9 +80,11 @@ function App() {
 
   return (
     <div className="app-container">
-    {window.innerWidth > 768 && <Sidebar onNav={handleNav} onSymptom={handleSymptom} activeNav={activeNav} />}
-      <ChatWindow messages={messages} loading={loading} onSend={sendMessage} severity={severity} />
-      <PatientPanel patient={patient} setPatient={setPatient} severity={severity} />
+      {/* ✅ Hide sidebar on ALL mobile/android devices */}
+      {!isMobile && <Sidebar onNav={handleNav} onSymptom={handleSymptom} activeNav={activeNav} />}
+      <ChatWindow messages={messages} loading={loading} onSend={sendMessage} severity={severity} isMobile={isMobile} />
+      {/* ✅ Hide patient panel on mobile */}
+      {!isMobile && <PatientPanel patient={patient} setPatient={setPatient} severity={severity} />}
     </div>
   );
 }
