@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-function ChatWindow({ messages, loading, onSend, severity }) {
+function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
   const [input, setInput] = useState("");
   const [isMobileMode, setIsMobileMode] = useState(true);
   const bottomRef = useRef(null);
@@ -10,7 +10,6 @@ function ChatWindow({ messages, loading, onSend, severity }) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // ✅ Visual viewport fix for Android
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {
@@ -29,15 +28,12 @@ function ChatWindow({ messages, loading, onSend, severity }) {
     setInput("");
   };
 
-  // ✅ Toggle desktop/mobile mode
   const toggleMode = () => {
     if (isMobileMode) {
-      // Switch to desktop mode
       const meta = document.querySelector("meta[name=viewport]");
       meta.setAttribute("content", "width=1024");
       setIsMobileMode(false);
     } else {
-      // Switch back to mobile mode
       const meta = document.querySelector("meta[name=viewport]");
       meta.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content");
       setIsMobileMode(true);
@@ -53,38 +49,49 @@ function ChatWindow({ messages, loading, onSend, severity }) {
       maxHeight: "100dvh",
       background: "#f0f4ff",
       overflow: "hidden",
-      position: "relative"
+      position: "relative",
+      width: "100%"
     }}>
 
       {/* Header */}
-      <div style={{ background: "linear-gradient(90deg, #0d6efd, #0dcaf0)", padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, boxShadow: "0 2px 10px rgba(0,0,0,0.1)", flexShrink: 0 }}>
+      <div style={{
+        background: "linear-gradient(90deg, #0d6efd, #0dcaf0)",
+        padding: "12px 16px",
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+        flexShrink: 0,
+        flexWrap: "wrap"
+      }}>
         <div style={{ fontSize: 24 }}>🏥</div>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, minWidth: 120 }}>
           <div style={{ color: "#fff", fontSize: 15, fontWeight: "bold" }}>MediBot AI Consultation</div>
           <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 11 }}>Powered by LLaMA 3.3 • Multi-Model AI</div>
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <div style={{ background: "#28a745", borderRadius: 20, padding: "3px 10px", color: "#fff", fontSize: 11, fontWeight: "bold" }}>● Live</div>
 
-          {/* ✅ Desktop/Mobile Toggle Button */}
-          <button
-            onClick={toggleMode}
-            title={isMobileMode ? "Switch to Desktop Mode" : "Switch to Mobile Mode"}
-            style={{
-              background: isMobileMode ? "rgba(255,255,255,0.2)" : "#fff",
-              border: "1px solid rgba(255,255,255,0.5)",
-              borderRadius: 20,
-              padding: "3px 10px",
-              color: isMobileMode ? "#fff" : "#0d6efd",
-              fontSize: 11,
-              fontWeight: "bold",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: 4
-            }}>
-            {isMobileMode ? "🖥️ Desktop" : "📱 Mobile"}
-          </button>
+          {/* Desktop/Mobile Toggle - only show on mobile */}
+          {isMobile && (
+            <button
+              onClick={toggleMode}
+              style={{
+                background: isMobileMode ? "rgba(255,255,255,0.2)" : "#fff",
+                border: "1px solid rgba(255,255,255,0.5)",
+                borderRadius: 20,
+                padding: "3px 10px",
+                color: isMobileMode ? "#fff" : "#0d6efd",
+                fontSize: 11,
+                fontWeight: "bold",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 4
+              }}>
+              {isMobileMode ? "🖥️ Desktop" : "📱 Mobile"}
+            </button>
+          )}
 
           {severity === "critical" && (
             <div style={{ background: "#dc3545", borderRadius: 20, padding: "3px 10px", color: "#fff", fontSize: 11, fontWeight: "bold" }}>🚨 SOS</div>
