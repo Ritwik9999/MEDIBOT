@@ -12,7 +12,7 @@ body {
 
 .app-container {
   display: flex;
-  height: 100dvh;        /* ✅ dvh instead of vh */
+  height: 100dvh;
   width: 100vw;
   overflow: hidden;
 }
@@ -49,20 +49,29 @@ input:focus, select:focus {
 @media (max-width: 768px) {
   .app-container {
     flex-direction: column;
-    height: 100dvh;       /* ✅ dvh shrinks when keyboard opens */
+    height: 100dvh;
     overflow: hidden;
   }
 
+  /* ✅ Hide sidebar completely on mobile */
   .sidebar {
-    width: 100% !important;
-    min-height: auto !important;
-    flex-direction: row !important;
-    padding: 8px 12px !important;
-    overflow-x: auto;
-    align-items: center;
+    display: none !important;
   }
 
   .patient-panel {
     display: none !important;
+  }
+
+  /* ✅ Chat takes full screen on mobile */
+  .chat-window {
+    width: 100vw !important;
+    height: 100dvh !important;
+    flex: 1;
+  }
+}
+/* Mobile Bottom Nav */
+@media (max-width: 768px) {
+  .mobile-nav {
+    display: flex !important;
   }
 }
