@@ -22,6 +22,8 @@ function PatientPanel({ patient, setPatient, severity }) {
           👤 Patient Information
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+
+          {/* Full Name */}
           <div>
             <label style={{ fontSize: 11, color: "#6c757d", fontWeight: "bold" }}>FULL NAME</label>
             <input
@@ -31,6 +33,8 @@ function PatientPanel({ patient, setPatient, severity }) {
               onChange={e => handlePatientChange("name", e.target.value)}
             />
           </div>
+
+          {/* Age */}
           <div>
             <label style={{ fontSize: 11, color: "#6c757d", fontWeight: "bold" }}>AGE</label>
             <input
@@ -40,6 +44,8 @@ function PatientPanel({ patient, setPatient, severity }) {
               onChange={e => handlePatientChange("age", e.target.value)}
             />
           </div>
+
+          {/* Gender */}
           <div>
             <label style={{ fontSize: 11, color: "#6c757d", fontWeight: "bold" }}>GENDER</label>
             <select
@@ -53,6 +59,48 @@ function PatientPanel({ patient, setPatient, severity }) {
               <option value="Other">Other</option>
             </select>
           </div>
+
+          {/* ✅ Response Language */}
+          <div>
+            <label style={{ fontSize: 11, color: "#6c757d", fontWeight: "bold" }}>🌍 RESPONSE LANGUAGE</label>
+            <select
+              style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 13, marginTop: 4, boxSizing: "border-box", outline: "none", background: "#fff" }}
+              value={patient.language || "auto"}
+              onChange={e => handlePatientChange("language", e.target.value)}
+            >
+              <option value="auto">🌐 Auto Detect</option>
+              <option value="english">🇬🇧 English</option>
+              <option value="hindi">🇮🇳 Hindi</option>
+              <option value="bengali">🇧🇩 Bengali</option>
+              <option value="tamil">🇮🇳 Tamil</option>
+              <option value="telugu">🇮🇳 Telugu</option>
+              <option value="gujarati">🇮🇳 Gujarati</option>
+              <option value="malayalam">🇮🇳 Malayalam</option>
+              <option value="punjabi">🇮🇳 Punjabi</option>
+              <option value="kannada">🇮🇳 Kannada</option>
+              <option value="odia">🇮🇳 Odia</option>
+              <option value="urdu">🇵🇰 Urdu</option>
+              <option value="arabic">🇸🇦 Arabic</option>
+              <option value="chinese">🇨🇳 Chinese</option>
+              <option value="japanese">🇯🇵 Japanese</option>
+              <option value="korean">🇰🇷 Korean</option>
+              <option value="spanish">🇪🇸 Spanish</option>
+              <option value="french">🇫🇷 French</option>
+              <option value="german">🇩🇪 German</option>
+              <option value="portuguese">🇧🇷 Portuguese</option>
+              <option value="italian">🇮🇹 Italian</option>
+              <option value="russian">🇷🇺 Russian</option>
+              <option value="turkish">🇹🇷 Turkish</option>
+              <option value="indonesian">🇮🇩 Indonesian</option>
+              <option value="vietnamese">🇻🇳 Vietnamese</option>
+              <option value="thai">🇹🇭 Thai</option>
+              <option value="dutch">🇳🇱 Dutch</option>
+              <option value="greek">🇬🇷 Greek</option>
+              <option value="hebrew">🇮🇱 Hebrew</option>
+              <option value="swahili">🌍 Swahili</option>
+            </select>
+          </div>
+
         </div>
       </div>
 
@@ -71,7 +119,7 @@ function PatientPanel({ patient, setPatient, severity }) {
         </div>
       </div>
 
-      {/* Tips */}
+      {/* Health Tips */}
       <div style={{ background: "#f0f4ff", borderRadius: 12, padding: 16 }}>
         <div style={{ fontSize: 13, fontWeight: "bold", color: "#0a1628", marginBottom: 10 }}>💡 Health Tips</div>
         {["Drink 8 glasses of water daily", "Sleep 7-8 hours per night", "Exercise 30 mins daily", "Eat balanced meals"].map(tip => (
@@ -98,6 +146,7 @@ function PatientPanel({ patient, setPatient, severity }) {
           ⚠️ MediBot provides general health information only. Always consult a qualified doctor for proper medical diagnosis and treatment.
         </div>
       </div>
+
     </div>
   );
 }
