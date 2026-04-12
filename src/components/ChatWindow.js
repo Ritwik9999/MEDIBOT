@@ -15,10 +15,18 @@ function ChatWindow({ messages, loading, onSend, severity }) {
   };
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: "100vh", background: "#f0f4ff" }}>
+    <div style={{
+      flex: 1,
+      display: "flex",
+      flexDirection: "column",
+      height: "100dvh",       /* ✅ FIXED: dvh shrinks when keyboard opens */
+      maxHeight: "100dvh",    /* ✅ prevents overflow */
+      background: "#f0f4ff",
+      overflow: "hidden"      /* ✅ stops page from scrolling */
+    }}>
 
       {/* Header */}
-      <div style={{ background: "linear-gradient(90deg, #0d6efd, #0dcaf0)", padding: "16px 24px", display: "flex", alignItems: "center", gap: 12, boxShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
+      <div style={{ background: "linear-gradient(90deg, #0d6efd, #0dcaf0)", padding: "16px 24px", display: "flex", alignItems: "center", gap: 12, boxShadow: "0 2px 10px rgba(0,0,0,0.1)", flexShrink: 0 }}>
         <div style={{ fontSize: 28 }}>🏥</div>
         <div>
           <div style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>MediBot AI Consultation</div>
@@ -34,13 +42,21 @@ function ChatWindow({ messages, loading, onSend, severity }) {
 
       {/* Emergency Banner */}
       {severity === "critical" && (
-        <div style={{ background: "#dc3545", color: "#fff", padding: "12px 24px", textAlign: "center", fontWeight: "bold", fontSize: 14 }}>
+        <div style={{ background: "#dc3545", color: "#fff", padding: "12px 24px", textAlign: "center", fontWeight: "bold", fontSize: 14, flexShrink: 0 }}>
           🚨 CRITICAL SYMPTOMS DETECTED — Please call 112 or visit nearest emergency room immediately!
         </div>
       )}
 
-      {/* Messages */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Messages — this is the ONLY scrollable area */}
+      <div style={{
+        flex: 1,
+        overflowY: "auto",
+        padding: "24px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
+        WebkitOverflowScrolling: "touch"  /* ✅ smooth scroll on iOS */
+      }}>
         {messages.map((msg, i) => (
           <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start", alignItems: "flex-end", gap: 10 }}>
             {msg.role === "assistant" && (
@@ -82,8 +98,14 @@ function ChatWindow({ messages, loading, onSend, severity }) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input Area */}
-      <div style={{ background: "#fff", padding: "16px 24px", borderTop: "1px solid #e0e0e0", boxShadow: "0 -2px 10px rgba(0,0,0,0.05)" }}>
+      {/* Input Area — always pinned to bottom */}
+      <div style={{
+        background: "#fff",
+        padding: "16px 24px",
+        borderTop: "1px solid #e0e0e0",
+        boxShadow: "0 -2px 10px rgba(0,0,0,0.05)",
+        flexShrink: 0   /* ✅ never shrinks, always visible above keyboard */
+      }}>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <input
             style={{ flex: 1, padding: "14px 20px", borderRadius: 30, border: "2px solid #e0e0e0", fontSize: 14, outline: "none", fontFamily: "inherit" }}
