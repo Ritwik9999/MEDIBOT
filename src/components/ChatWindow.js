@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
   const [input, setInput] = useState("");
   const [isMobileMode, setIsMobileMode] = useState(true);
+  const [feedback, setFeedback] = useState({});
   const bottomRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -40,6 +41,21 @@ function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
     }
   };
 
+  // ✅ Handle feedback
+  const handleFeedback = (msgIndex, type) => {
+    setFeedback(prev => ({ ...prev, [msgIndex]: type }));
+    // Store feedback in localStorage
+    const feedbackData = JSON.parse(localStorage.getItem('medibot_feedback') || '[]');
+    feedbackData.push({
+      messageIndex: msgIndex,
+      message: messages[msgIndex]?.content,
+      feedback: type,
+      timestamp: new Date().toISOString()
+    });
+    localStorage.setItem('medibot_feedback', JSON.stringify(feedbackData));
+    console.log(`Feedback recorded: ${type} for message ${msgIndex}`);
+  };
+
   return (
     <div ref={containerRef} className="chat-window" style={{
       flex: 1,
@@ -71,8 +87,6 @@ function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <div style={{ background: "#28a745", borderRadius: 20, padding: "3px 10px", color: "#fff", fontSize: 11, fontWeight: "bold" }}>● Live</div>
-
-          {/* Desktop/Mobile Toggle - only show on mobile */}
           {isMobile && (
             <button
               onClick={toggleMode}
@@ -85,14 +99,10 @@ function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
                 fontSize: 11,
                 fontWeight: "bold",
                 cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: 4
               }}>
               {isMobileMode ? "🖥️ Desktop" : "📱 Mobile"}
             </button>
           )}
-
           {severity === "critical" && (
             <div style={{ background: "#dc3545", borderRadius: 20, padding: "3px 10px", color: "#fff", fontSize: 11, fontWeight: "bold" }}>🚨 SOS</div>
           )}
@@ -119,31 +129,59 @@ function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
         overflowAnchor: "none",
       }}>
         {messages.map((msg, i) => (
-          <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start", alignItems: "flex-end", gap: 8 }}>
-            {msg.role === "assistant" && (
-              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #0d6efd, #0dcaf0)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>🤖</div>
-            )}
-            <div style={{
-              background: msg.role === "user" ? "linear-gradient(135deg, #0d6efd, #0dcaf0)" : "#fff",
-              color: msg.role === "user" ? "#fff" : "#1a1a2e",
-              padding: "12px 16px",
-              borderRadius: msg.role === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
-              maxWidth: "75%",
-              fontSize: 14,
-              lineHeight: 1.7,
-              boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-              whiteSpace: "pre-wrap"
-            }}>
-              {msg.content}
-              <div style={{ fontSize: 10, opacity: 0.6, marginTop: 4, textAlign: "right" }}>
-                {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          <div key={i}>
+            <div style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start", alignItems: "flex-end", gap: 8 }}>
+              {msg.role === "assistant" && (
+                <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #0d6efd, #0dcaf0)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>🤖</div>
+              )}
+              <div style={{
+                background: msg.role === "user" ? "linear-gradient(135deg, #0d6efd, #0dcaf0)" : "#fff",
+                color: msg.role === "user" ? "#fff" : "#1a1a2e",
+                padding: "12px 16px",
+                borderRadius: msg.role === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+                maxWidth: "75%",
+                fontSize: 14,
+                lineHeight: 1.7,
+                boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+                whiteSpace: "pre-wrap"
+              }}>
+                {msg.content}
+                <div style={{ fontSize: 10, opacity: 0.6, marginTop: 4, textAlign: "right" }}>
+                  {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </div>
               </div>
+              {msg.role === "user" && (
+                <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#6c757d", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>👤</div>
+              )}
             </div>
-            {msg.role === "user" && (
-              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#6c757d", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>👤</div>
+
+            {/* ✅ Feedback buttons for assistant messages */}
+            {msg.role === "assistant" && i > 0 && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4, marginLeft: 40 }}>
+                {feedback[i] ? (
+                  <span style={{ fontSize: 11, color: "#28a745" }}>
+                    {feedback[i] === 'up' ? '✅ Thanks for your feedback!' : '📝 Thanks! We\'ll improve this.'}
+                  </span>
+                ) : (
+                  <>
+                    <span style={{ fontSize: 11, color: "#999" }}>Was this helpful?</span>
+                    <button
+                      onClick={() => handleFeedback(i, 'up')}
+                      style={{ background: "none", border: "1px solid #28a745", borderRadius: 20, padding: "2px 10px", cursor: "pointer", fontSize: 12, color: "#28a745" }}>
+                      👍
+                    </button>
+                    <button
+                      onClick={() => handleFeedback(i, 'down')}
+                      style={{ background: "none", border: "1px solid #dc3545", borderRadius: 20, padding: "2px 10px", cursor: "pointer", fontSize: 12, color: "#dc3545" }}>
+                      👎
+                    </button>
+                  </>
+                )}
+              </div>
             )}
           </div>
         ))}
+
         {loading && (
           <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
             <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #0d6efd, #0dcaf0)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🤖</div>
