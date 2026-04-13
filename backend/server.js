@@ -58,17 +58,60 @@ function detectLanguage(text) {
   return 'english';
 }
 
-// ✅ Safety Check
+// ✅ Fixed Safety Check - keyword first, AI only for suspicious messages
 async function isSafeMessage(message) {
+  const lowerMessage = message.toLowerCase();
+
+  // ✅ Always safe - medical and general messages
+  const safeKeywords = [
+    'fever', 'pain', 'headache', 'cough', 'cold', 'flu',
+    'diabetes', 'blood pressure', 'chest', 'stomach', 'heart',
+    'vomit', 'diarrhea', 'rash', 'allergy', 'breathing',
+    'stroke', 'emergency', 'pregnant', 'pregnancy', 'baby',
+    'child', 'medicine', 'doctor', 'hospital', 'clinic',
+    'symptom', 'sick', 'ill', 'hurt', 'injury', 'wound',
+    'burn', 'swelling', 'infection', 'fatigue', 'tired',
+    'dizzy', 'nausea', 'cancer', 'asthma', 'malaria',
+    'dengue', 'typhoid', 'tuberculosis', 'kidney', 'liver',
+    'thyroid', 'arthritis', 'depression', 'anxiety', 'mental',
+    'hello', 'hi', 'help', 'please', 'thank', 'good',
+    'morning', 'evening', 'night', 'how are', 'what is',
+    'i have', 'i feel', 'i am', 'my', 'me', 'please help',
+    // Hindi
+    'बुखार', 'दर्द', 'सिरदर्द', 'खांसी', 'बीमार', 'मदद',
+    // Bengali
+    'জ্বর', 'ব্যথা', 'অসুস্থ', 'সাহায্য',
+    // Arabic
+    'ألم', 'حمى', 'مريض', 'مساعدة'
+  ];
+
+  // If message contains any safe keyword → skip AI check
+  if (safeKeywords.some(k => lowerMessage.includes(k))) {
+    return true;
+  }
+
+  // ❌ Always unsafe - explicit bad content
+  const unsafeKeywords = [
+    'fuck', 'shit', 'bitch', 'asshole', 'bastard',
+    'kill yourself', 'go die', 'hate you', 'stupid bot',
+    'sex', 'porn', 'naked', 'nude', 'xxx'
+  ];
+
+  if (unsafeKeywords.some(k => lowerMessage.includes(k))) {
+    return false;
+  }
+
+  // For everything else → use AI safety check
   try {
     const safetyResponse = await groq.chat.completions.create({
       model: 'openai/gpt-oss-safeguard-20b',
       messages: [
         {
           role: 'system',
-          content: `You are a safety classifier. Classify if the message is SAFE or UNSAFE.
-UNSAFE means: hate speech, harassment, humiliation, abuse, sexual content, violence, self-harm promotion, or completely off-topic non-medical content.
-SAFE means: medical questions, symptoms, health advice, greetings, general health topics.
+          content: `You are a safety classifier for a medical chatbot.
+Only classify as UNSAFE if message contains explicit hate speech, severe harassment, sexual content, or instructions for violence.
+Medical questions, symptoms, greetings, general questions = SAFE.
+Short messages, single words, incomplete sentences = SAFE.
 Reply with only one word: SAFE or UNSAFE`
         },
         { role: 'user', content: message }
@@ -76,7 +119,7 @@ Reply with only one word: SAFE or UNSAFE`
       max_tokens: 10,
     });
     const result = safetyResponse.choices[0].message.content.trim().toUpperCase();
-    return result.includes('SAFE') && !result.includes('UNSAFE');
+    return !result.includes('UNSAFE');
   } catch (error) {
     console.log('Safety check failed, defaulting to safe:', error.message);
     return true;
@@ -206,7 +249,7 @@ app.post('/chat', async (req, res) => {
     const safe = await isSafeMessage(lastUserMessage);
     if (!safe) {
       return res.json({
-        reply: "I'm Dr. MediBot, here to help with medical questions only. I noticed your message wasn't related to health topics or contained inappropriate content. Please feel free to ask me about any symptoms, health concerns, or medical questions. I'm here to help! 🏥",
+        reply: "I'm Dr. MediBot, here to help with medical questions only. I noticed your message contained inappropriate content. Please feel free to ask me about any symptoms, health concerns, or medical questions. I'm here to help! 🏥",
         modelUsed: 'safety-filter',
         whoGuidelinesUsed: false
       });
