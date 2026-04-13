@@ -81,7 +81,7 @@ function App() {
   return (
     <div className="app-container">
       {/* ✅ Hide sidebar on ALL mobile/android devices */}
-      {!isMobile && <Sidebar onNav={handleNav} onSymptom={handleSymptom} activeNav={activeNav} />}
+    {!isMobile && <Sidebar onNav={handleNav} onSymptom={handleSymptom} activeNav={activeNav} onSymptomForm={sendMessage} />}
       <ChatWindow messages={messages} loading={loading} onSend={sendMessage} severity={severity} isMobile={isMobile} />
       {/* ✅ Hide patient panel on mobile */}
       {!isMobile && <PatientPanel patient={patient} setPatient={setPatient} severity={severity} />}

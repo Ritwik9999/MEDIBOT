@@ -1,13 +1,36 @@
-function Sidebar({ onNav, onSymptom, activeNav }) {
-  // ✅ Hide on mobile using JS check
-  const isMobile = window.innerWidth <= 768;
+import { useState } from "react";
+
+function Sidebar({ onNav, onSymptom, activeNav, onSymptomForm }) {
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    symptom: "",
+    duration: "",
+    severity: "5",
+    location: "",
+    existing: ""
+  });
+
+  const isMobile = window.innerWidth <= 900 || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
   if (isMobile) return null;
+
+  const handleFormSubmit = () => {
+    if (!formData.symptom) return;
+    const message = `I have ${formData.symptom}. 
+Duration: ${formData.duration || 'not sure'}.
+Severity: ${formData.severity}/10.
+Location: ${formData.location || 'not specified'}.
+Existing conditions: ${formData.existing || 'none'}.`;
+    onSymptomForm(message);
+    setShowForm(false);
+    setFormData({ symptom: "", duration: "", severity: "5", location: "", existing: "" });
+  };
 
   return (
     <div className="sidebar" style={{
       width: 220, minHeight: "100vh", background: "#0a1628",
       display: "flex", flexDirection: "column", padding: "24px 0",
-      boxShadow: "2px 0 10px rgba(0,0,0,0.3)", flexShrink: 0
+      boxShadow: "2px 0 10px rgba(0,0,0,0.3)", flexShrink: 0,
+      overflowY: "auto"
     }}>
       {/* Logo */}
       <div style={{ padding: "0 24px 32px", borderBottom: "1px solid #1e3a5f" }}>
@@ -26,7 +49,10 @@ function Sidebar({ onNav, onSymptom, activeNav }) {
           { icon: "🚨", label: "Emergency" },
         ].map((item) => (
           <div key={item.label}
-            onClick={() => onNav(item.label)}
+            onClick={() => {
+              onNav(item.label);
+              if (item.label === "Symptom Checker") setShowForm(true);
+            }}
             style={{
               display: "flex", alignItems: "center", gap: 12,
               padding: "10px 12px", borderRadius: 8, marginBottom: 4,
@@ -43,6 +69,79 @@ function Sidebar({ onNav, onSymptom, activeNav }) {
             <span>{item.label}</span>
           </div>
         ))}
+
+        {/* ✅ Symptom Checker Form */}
+        {showForm && (
+          <div style={{ background: "#1e3a5f", borderRadius: 10, padding: 12, marginTop: 8 }}>
+            <div style={{ color: "#fff", fontSize: 12, fontWeight: "bold", marginBottom: 10 }}>📋 Symptom Details</div>
+
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ color: "#7aa3cc", fontSize: 10, marginBottom: 4 }}>MAIN SYMPTOM *</div>
+              <input
+                style={{ width: "100%", padding: "6px 10px", borderRadius: 6, border: "1px solid #2e5a8f", background: "#0a1628", color: "#fff", fontSize: 12, boxSizing: "border-box", outline: "none" }}
+                placeholder="e.g. headache, fever"
+                value={formData.symptom}
+                onChange={e => setFormData({ ...formData, symptom: e.target.value })}
+              />
+            </div>
+
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ color: "#7aa3cc", fontSize: 10, marginBottom: 4 }}>DURATION</div>
+              <input
+                style={{ width: "100%", padding: "6px 10px", borderRadius: 6, border: "1px solid #2e5a8f", background: "#0a1628", color: "#fff", fontSize: 12, boxSizing: "border-box", outline: "none" }}
+                placeholder="e.g. 2 days, 1 week"
+                value={formData.duration}
+                onChange={e => setFormData({ ...formData, duration: e.target.value })}
+              />
+            </div>
+
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ color: "#7aa3cc", fontSize: 10, marginBottom: 4 }}>SEVERITY: {formData.severity}/10</div>
+              <input
+                type="range" min="1" max="10"
+                style={{ width: "100%", accentColor: "#0d6efd" }}
+                value={formData.severity}
+                onChange={e => setFormData({ ...formData, severity: e.target.value })}
+              />
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#7aa3cc", fontSize: 9 }}>
+                <span>Mild</span><span>Moderate</span><span>Severe</span>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ color: "#7aa3cc", fontSize: 10, marginBottom: 4 }}>BODY LOCATION</div>
+              <input
+                style={{ width: "100%", padding: "6px 10px", borderRadius: 6, border: "1px solid #2e5a8f", background: "#0a1628", color: "#fff", fontSize: 12, boxSizing: "border-box", outline: "none" }}
+                placeholder="e.g. head, chest, stomach"
+                value={formData.location}
+                onChange={e => setFormData({ ...formData, location: e.target.value })}
+              />
+            </div>
+
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ color: "#7aa3cc", fontSize: 10, marginBottom: 4 }}>EXISTING CONDITIONS</div>
+              <input
+                style={{ width: "100%", padding: "6px 10px", borderRadius: 6, border: "1px solid #2e5a8f", background: "#0a1628", color: "#fff", fontSize: 12, boxSizing: "border-box", outline: "none" }}
+                placeholder="e.g. diabetes, BP"
+                value={formData.existing}
+                onChange={e => setFormData({ ...formData, existing: e.target.value })}
+              />
+            </div>
+
+            <div style={{ display: "flex", gap: 6 }}>
+              <button
+                onClick={handleFormSubmit}
+                style={{ flex: 1, padding: "8px", borderRadius: 6, background: "linear-gradient(90deg, #0d6efd, #0dcaf0)", color: "#fff", border: "none", cursor: "pointer", fontSize: 12, fontWeight: "bold" }}>
+                Send →
+              </button>
+              <button
+                onClick={() => setShowForm(false)}
+                style={{ padding: "8px 12px", borderRadius: 6, background: "#dc3545", color: "#fff", border: "none", cursor: "pointer", fontSize: 12 }}>
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Quick Symptoms */}
         <div style={{ color: "#7aa3cc", fontSize: 10, fontWeight: "bold", letterSpacing: 1, marginTop: 24, marginBottom: 12 }}>QUICK SYMPTOMS</div>
