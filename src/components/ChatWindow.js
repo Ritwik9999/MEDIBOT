@@ -4,8 +4,12 @@ function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
   const [input, setInput] = useState("");
   const [isMobileMode, setIsMobileMode] = useState(true);
   const [feedback, setFeedback] = useState({});
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
   const bottomRef = useRef(null);
   const containerRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -22,6 +26,15 @@ function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
     handleResize();
     return () => window.visualViewport?.removeEventListener("resize", handleResize);
   }, []);
+
+  // ✅ Auto-speak new assistant messages when voice enabled
+  useEffect(() => {
+    if (!voiceEnabled) return;
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg?.role === 'assistant') {
+      speakText(lastMsg.content);
+    }
+  }, [messages]);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -41,19 +54,83 @@ function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
     }
   };
 
-  // ✅ Handle feedback
+  // ✅ Feedback handler
   const handleFeedback = (msgIndex, type) => {
     setFeedback(prev => ({ ...prev, [msgIndex]: type }));
-    // Store feedback in localStorage
     const feedbackData = JSON.parse(localStorage.getItem('medibot_feedback') || '[]');
     feedbackData.push({
-      messageIndex: msgIndex,
       message: messages[msgIndex]?.content,
       feedback: type,
       timestamp: new Date().toISOString()
     });
     localStorage.setItem('medibot_feedback', JSON.stringify(feedbackData));
-    console.log(`Feedback recorded: ${type} for message ${msgIndex}`);
+  };
+
+  // ✅ Voice Input — Speech to Text
+  const startListening = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Voice input not supported in this browser. Please use Chrome!");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => setIsListening(true);
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      setIsListening(false);
+    };
+
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const stopListening = () => {
+    recognitionRef.current?.stop();
+    setIsListening(false);
+  };
+
+  // ✅ Voice Output — Text to Speech
+  const speakText = (text) => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+
+    // Clean text — remove emojis and special chars
+    const cleanText = text.replace(/[^\w\s.,?!-]/g, '').slice(0, 500);
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    // Try to use a natural voice
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v =>
+      v.name.includes('Google') ||
+      v.name.includes('Natural') ||
+      v.name.includes('Female')
+    );
+    if (preferred) utterance.voice = preferred;
+
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const stopSpeaking = () => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
   };
 
   return (
@@ -87,6 +164,27 @@ function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <div style={{ background: "#28a745", borderRadius: 20, padding: "3px 10px", color: "#fff", fontSize: 11, fontWeight: "bold" }}>● Live</div>
+
+          {/* ✅ Voice Toggle Button */}
+          <button
+            onClick={() => {
+              setVoiceEnabled(!voiceEnabled);
+              if (isSpeaking) stopSpeaking();
+            }}
+            title={voiceEnabled ? "Disable voice" : "Enable voice responses"}
+            style={{
+              background: voiceEnabled ? "#fff" : "rgba(255,255,255,0.2)",
+              border: "1px solid rgba(255,255,255,0.5)",
+              borderRadius: 20,
+              padding: "3px 10px",
+              color: voiceEnabled ? "#0d6efd" : "#fff",
+              fontSize: 11,
+              fontWeight: "bold",
+              cursor: "pointer",
+            }}>
+            {voiceEnabled ? "🔊 Voice On" : "🔇 Voice Off"}
+          </button>
+
           {isMobile && (
             <button
               onClick={toggleMode}
@@ -103,6 +201,7 @@ function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
               {isMobileMode ? "🖥️ Desktop" : "📱 Mobile"}
             </button>
           )}
+
           {severity === "critical" && (
             <div style={{ background: "#dc3545", borderRadius: 20, padding: "3px 10px", color: "#fff", fontSize: 11, fontWeight: "bold" }}>🚨 SOS</div>
           )}
@@ -113,6 +212,23 @@ function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
       {severity === "critical" && (
         <div style={{ background: "#dc3545", color: "#fff", padding: "10px 16px", textAlign: "center", fontWeight: "bold", fontSize: 13, flexShrink: 0 }}>
           🚨 CRITICAL — Call 112 immediately!
+        </div>
+      )}
+
+      {/* Voice listening indicator */}
+      {isListening && (
+        <div style={{ background: "#dc3545", color: "#fff", padding: "8px 16px", textAlign: "center", fontSize: 13, flexShrink: 0, animation: "pulse 1s infinite" }}>
+          🎤 Listening... Speak now!
+        </div>
+      )}
+
+      {/* Speaking indicator */}
+      {isSpeaking && (
+        <div style={{ background: "#0d6efd", color: "#fff", padding: "8px 16px", textAlign: "center", fontSize: 13, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          🔊 Speaking...
+          <button onClick={stopSpeaking} style={{ background: "rgba(255,255,255,0.3)", border: "none", borderRadius: 10, padding: "2px 8px", color: "#fff", cursor: "pointer", fontSize: 11 }}>
+            Stop
+          </button>
         </div>
       )}
 
@@ -155,23 +271,29 @@ function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
               )}
             </div>
 
-            {/* ✅ Feedback buttons for assistant messages */}
+            {/* ✅ Speak + Feedback buttons for assistant */}
             {msg.role === "assistant" && i > 0 && (
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4, marginLeft: 40 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4, marginLeft: 40, flexWrap: "wrap" }}>
+                {/* Speak button */}
+                <button
+                  onClick={() => speakText(msg.content)}
+                  style={{ background: "none", border: "1px solid #0d6efd", borderRadius: 20, padding: "2px 10px", cursor: "pointer", fontSize: 11, color: "#0d6efd" }}>
+                  🔊 Speak
+                </button>
+
+                {/* Feedback */}
                 {feedback[i] ? (
                   <span style={{ fontSize: 11, color: "#28a745" }}>
-                    {feedback[i] === 'up' ? '✅ Thanks for your feedback!' : '📝 Thanks! We\'ll improve this.'}
+                    {feedback[i] === 'up' ? '✅ Thanks!' : '📝 Thanks! We\'ll improve.'}
                   </span>
                 ) : (
                   <>
-                    <span style={{ fontSize: 11, color: "#999" }}>Was this helpful?</span>
-                    <button
-                      onClick={() => handleFeedback(i, 'up')}
+                    <span style={{ fontSize: 11, color: "#999" }}>Helpful?</span>
+                    <button onClick={() => handleFeedback(i, 'up')}
                       style={{ background: "none", border: "1px solid #28a745", borderRadius: 20, padding: "2px 10px", cursor: "pointer", fontSize: 12, color: "#28a745" }}>
                       👍
                     </button>
-                    <button
-                      onClick={() => handleFeedback(i, 'down')}
+                    <button onClick={() => handleFeedback(i, 'down')}
                       style={{ background: "none", border: "1px solid #dc3545", borderRadius: 20, padding: "2px 10px", cursor: "pointer", fontSize: 12, color: "#dc3545" }}>
                       👎
                     </button>
@@ -209,12 +331,30 @@ function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
         zIndex: 10
       }}>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+
+          {/* ✅ Mic Button */}
+          <button
+            onClick={isListening ? stopListening : startListening}
+            style={{
+              padding: "12px 14px",
+              borderRadius: "50%",
+              background: isListening ? "#dc3545" : "linear-gradient(90deg, #0d6efd, #0dcaf0)",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              fontSize: 16,
+              flexShrink: 0,
+              animation: isListening ? "pulse 1s infinite" : "none"
+            }}>
+            {isListening ? "⏹️" : "🎤"}
+          </button>
+
           <input
             style={{ flex: 1, padding: "12px 16px", borderRadius: 30, border: "2px solid #e0e0e0", fontSize: 14, outline: "none", fontFamily: "inherit" }}
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && handleSend()}
-            placeholder="Describe your symptoms..."
+            placeholder={isListening ? "Listening..." : "Describe your symptoms or tap 🎤"}
           />
           <button
             onClick={handleSend}
