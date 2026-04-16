@@ -384,7 +384,8 @@ app.post('/chat', async (req, res) => {
       temperature: 0.7,
     });
 
-    const reply = response.choices[0].message.content;
+   let reply = response.choices[0].message.content;
+reply = reply.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
     res.json({
       reply,
