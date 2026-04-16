@@ -243,7 +243,7 @@ function selectModelByIntent(intent, complexity, language) {
 
   if (intent === 'COMPLEX' || complexity === 'HIGH') {
     console.log('🧠 SLOW PATH → DeepSeek R1 — Complex medical');
-    return { model: 'deepseek-r1-distill-llama-70b', path: 'SLOW' };
+    return { model: 'llama-3.3-70b-versatile', path: 'SLOW' };
   }
 
   if (intent === 'MENTAL') {
