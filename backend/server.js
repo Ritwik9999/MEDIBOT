@@ -243,12 +243,12 @@ function selectModelByIntent(intent, complexity, language) {
 
   if (intent === 'COMPLEX' || complexity === 'HIGH') {
     console.log('🧠 SLOW PATH → DeepSeek R1 — Complex medical');
-    return { model: 'deepseek-r1-distill-qwen-32b', path: 'SLOW' };
+    return { model: 'openai/gpt-oss-120b', path: 'SLOW' };
   }
 
   if (intent === 'MENTAL') {
     console.log('💙 SLOW PATH → LLaMA 3.3 70b — Mental health');
-    return { model: 'deepseek-r1-distill-qwen-32b', path: 'SLOW' };
+    return { model: 'openai/gpt-oss-120b', path: 'SLOW' };
   }
 
   if (isIndian || isMultilingual) {
