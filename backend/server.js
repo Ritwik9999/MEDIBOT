@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 const Groq = require('groq-sdk');
 const { buildRAGContext } = require('./rag');
+const { updatePatientProfile, buildLongTermContext } = require('./longTermMemory');
 
 const app = express();
 app.use(cors());
