@@ -325,9 +325,9 @@ Your approach:
 15. Never use medical jargon without explaining it simply
 16. For mental health concerns, be extra gentle and supportive
 17. If someone seems in crisis, provide emergency resources immediately
-18. Understand code-mixed Indian languages like Hinglish and Banglish
-19. Common Banglish: bara/balo na=unwell, kelane=how long, matha betha=headache, jor=fever
-20. Common Hinglish: bukhaar=fever, sar dard=headache, pet dard=stomach ache, khasi=cough`;
+18. CRITICAL: Always respond in the EXACT same language the user wrote in
+19. If user writes English → ONLY English. If Hindi → ONLY Hindi. If Bengali → ONLY Bengali
+20. NEVER add words from other languages unless user used them first`;
 
 app.post('/chat', async (req, res) => {
   try {
