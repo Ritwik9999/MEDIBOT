@@ -362,6 +362,17 @@ app.post('/chat', async (req, res) => {
     // Step 4: WHO guidelines
     const ragContext = buildRAGContext(lastUserMessage);
 
+    // Step 5: Patient context + Long-term Memory
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown';
+    const memoryKey = patient?.name ? 'patient_' + patient.name.toLowerCase().replace(/\s/g, '_') : 'ip_' + ip;
+    await updatePatientProfile(memoryKey, {
+      conditions: [],
+      symptoms: [],
+      allergies: [],
+      language,
+      intent: intentResult.intent
+    });
+    const longTermContext = await buildLongTermContext(memoryKey);
     // Step 5: Patient context
     const patientContext = patient?.name
       ? `\n\nPatient: Name: ${patient.name}, Age: ${patient.age || 'unknown'}, Gender: ${patient.gender || 'unknown'}`
@@ -371,7 +382,9 @@ app.post('/chat', async (req, res) => {
     const enhancedSystemPrompt =
       SYSTEM_PROMPT +
       patientContext +
-      getLanguagePrompt(language) +
+      longTermContext +
+      longTermContext +
+  getLanguagePrompt(language) +
       ragContext;
 
     // Step 7: Get AI response
