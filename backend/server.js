@@ -313,7 +313,7 @@ function getLanguagePrompt(language) {
     indonesian: '\n\nIMPORTANT: Respond ONLY in Indonesian.',
     vietnamese: '\n\nIMPORTANT: Respond ONLY in Vietnamese.',
     swahili: '\n\nIMPORTANT: Respond ONLY in Swahili.',
-    english: ''
+    english: '\n\nIMPORTANT: Respond ONLY in English. Do NOT use Hindi, Bengali, or any other language.'
   };
   return prompts[language] || '\n\nIMPORTANT: Respond in the same language the user is writing in.';
 }
