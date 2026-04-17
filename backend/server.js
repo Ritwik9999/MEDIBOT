@@ -206,6 +206,7 @@ EMERGENCY - life threatening (chest pain, stroke, not breathing, suicide, overdo
 COMPLEX - chronic conditions (diabetes, cancer, hypertension, surgery, kidney, liver, psychiatric)
 SYMPTOM - general symptoms (fever, headache, cough, cold, nausea, rash, pain, tired)
 MENTAL - mental health (depression, anxiety, stress, sadness, crying, hopeless)
+STUDY - medical education (explain, pathophysiology, mechanism, treatment protocol, diagnosis of, what is, how does, anatomy, pharmacology)
 GREETING - hello, hi, how are you, greetings, thanks
 GENERAL - anything else
 
@@ -244,6 +245,12 @@ function selectModelByIntent(intent, complexity, language) {
   if (intent === 'COMPLEX' || complexity === 'HIGH') {
     console.log('🧠 SLOW PATH → DeepSeek R1 — Complex medical');
     return { model: 'openai/gpt-oss-120b', path: 'SLOW' };
+  }
+
+  // 📚 SLOW PATH — Medical Study (deep knowledge needed)
+  if (intent === 'STUDY') {
+    console.log('📚 SLOW PATH → GPT-OSS 120B — Medical Study');
+    return { model: 'openai/gpt-oss-120b', path: 'SLOW', reason: 'study' };
   }
 
   if (intent === 'MENTAL') {
@@ -329,6 +336,26 @@ Your approach:
 19. If user writes English → ONLY English. If Hindi → ONLY Hindi. If Bengali → ONLY Bengali
 20. NEVER add words from other languages unless user used them first`;
 
+const STUDY_PROMPT = `You are Dr. MediBot Professor Mode — a world-class medical professor with expertise across all medical specialties.
+
+When a medical student asks a question:
+1. Start with a clear, simple definition
+2. Explain the pathophysiology step by step
+3. List the etiology (causes)
+4. Describe clinical features and symptoms
+5. Explain diagnostic approach and investigations
+6. Describe treatment protocols (pharmacological + non-pharmacological)
+7. Mention complications if untreated
+8. Add recent research findings when relevant
+9. Use mnemonics to help remember
+10. End with a clinical pearl or exam tip
+
+Sources: Harrison Internal Medicine, Robbins Pathology, Guyton Physiology, Davidson Medicine, Bailey and Love Surgery, Nelson Pediatrics, WHO Guidelines
+
+Format: Clear sections. Use simple language but include proper medical terminology. Explain every medical term when first used.
+
+IMPORTANT: Always mention this is for educational purposes only at the end.`;
+
 app.post('/chat', async (req, res) => {
   try {
     const { messages, patient } = req.body;
@@ -378,9 +405,12 @@ app.post('/chat', async (req, res) => {
       ? `\n\nPatient: Name: ${patient.name}, Age: ${patient.age || 'unknown'}, Gender: ${patient.gender || 'unknown'}`
       : '';
 
+    // Step 6: Select base prompt based on intent
+    const basePrompt = intentResult.intent === 'STUDY' ? STUDY_PROMPT : SYSTEM_PROMPT;
+
     // Step 6: Build enhanced prompt
     const enhancedSystemPrompt =
-      SYSTEM_PROMPT +
+      basePrompt +
       patientContext +
       longTermContext +
       longTermContext +
@@ -394,7 +424,7 @@ app.post('/chat', async (req, res) => {
         { role: 'system', content: enhancedSystemPrompt },
         ...messages
       ],
-      max_tokens: 600,
+      max_tokens: intentResult.intent === "STUDY" ? 1500 : 600,
       temperature: 0.7,
     });
 
