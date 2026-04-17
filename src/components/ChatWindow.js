@@ -44,7 +44,7 @@ function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
   const toggleMode = () => {
     const meta = document.querySelector("meta[name=viewport]");
     if (isMobileMode) {
-      meta.setAttribute("content", "width=1024");
+      // Desktop mode disabled for mobile
       setIsMobileMode(false);
     } else {
       meta.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content");
