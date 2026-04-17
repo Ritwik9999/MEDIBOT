@@ -34,7 +34,7 @@ function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
     if (lastMsg?.role === 'assistant') {
       speakText(lastMsg.content);
     }
-  }, [messages]);
+  }, [messages, voiceEnabled]);
 
   const handleSend = () => {
     if (!input.trim()) return;
