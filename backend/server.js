@@ -356,6 +356,144 @@ Format: Use plain text only. NO markdown, NO tables, NO bold, NO headers, NO pip
 
 IMPORTANT: Always mention this is for educational purposes only at the end.`;
 
+
+
+
+
+// ✅ RAG Knowledge Expansion System
+app.post('/learn', async (req, res) => {
+  try {
+    const { topic, knowledge } = req.body;
+    if (!topic || !knowledge) return res.status(400).json({ error: 'Missing topic or knowledge' });
+
+    const { MongoClient } = require('mongodb');
+    const client = new MongoClient(process.env.MONGODB_URI);
+    await client.connect();
+    const db = client.db('medibot');
+    await db.collection('knowledge').updateOne(
+      { topic: topic.toLowerCase() },
+      { $set: { 
+        topic: topic.toLowerCase(), 
+        knowledge, 
+        updatedAt: new Date().toISOString() 
+      }},
+      { upsert: true }
+    );
+    await client.close();
+    console.log('📚 New knowledge stored: ' + topic);
+    res.json({ status: 'ok', topic });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to store knowledge' });
+  }
+});
+
+// ✅ Search expanded knowledge from MongoDB
+async function searchExpandedKnowledge(message) {
+  try {
+    const { MongoClient } = require('mongodb');
+    const client = new MongoClient(process.env.MONGODB_URI);
+    await client.connect();
+    const db = client.db('medibot');
+
+    // Extract key medical terms from message
+    const medicalTerms = message.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+    
+    let context = '';
+    for (const term of medicalTerms.slice(0, 3)) {
+      const found = await db.collection('knowledge').findOne({
+        topic: { $regex: term, $options: 'i' }
+      });
+      if (found) {
+        context += '\nExpanded Knowledge on ' + found.topic + ': ' + found.knowledge.slice(0, 300);
+      }
+    }
+    
+    await client.close();
+    
+    if (context) {
+      return '\n\nEXPANDED MEDICAL KNOWLEDGE (from database):' + context;
+    }
+    return '';
+  } catch (error) {
+    return '';
+  }
+}
+
+// ✅ Feedback Learning System
+const feedbackStore = new Map();
+
+app.post('/feedback', async (req, res) => {
+  try {
+    const { message, reply, feedback, intent } = req.body;
+    const key = message.toLowerCase().trim().slice(0, 100);
+
+    if (feedback === 'down') {
+      feedbackStore.set(key, {
+        badReply: reply.slice(0, 200),
+        intent,
+        timestamp: new Date().toISOString()
+      });
+      console.log('📝 Negative feedback stored for learning');
+
+      // Also store in MongoDB for persistence
+      const { MongoClient } = require('mongodb');
+      try {
+        const client = new MongoClient(process.env.MONGODB_URI);
+        await client.connect();
+        const db = client.db('medibot');
+        await db.collection('feedback').insertOne({
+          question: message,
+          badReply: reply.slice(0, 300),
+          feedback: 'negative',
+          intent,
+          timestamp: new Date().toISOString()
+        });
+        await client.close();
+        console.log('💾 Feedback saved to MongoDB');
+      } catch (e) {
+        console.log('MongoDB feedback save failed');
+      }
+    }
+
+    res.json({ status: 'ok' });
+  } catch (error) {
+    res.json({ status: 'ok' });
+  }
+});
+
+// ✅ Build feedback context for better responses
+async function getFeedbackContext(message) {
+  try {
+    const key = message.toLowerCase().trim().slice(0, 100);
+
+    // Check in-memory first
+    if (feedbackStore.has(key)) {
+      const fb = feedbackStore.get(key);
+      return '\n\nFEEDBACK LEARNING: A similar question was asked before and the response was rated poorly. The bad response was: "' + fb.badReply + '". Please provide a DIFFERENT and BETTER response this time. Be more specific, empathetic, and helpful.';
+    }
+
+    // Check MongoDB for similar past feedback
+    const { MongoClient } = require('mongodb');
+    try {
+      const client = new MongoClient(process.env.MONGODB_URI);
+      await client.connect();
+      const db = client.db('medibot');
+      const similarFeedback = await db.collection('feedback').findOne({
+        question: { $regex: message.slice(0, 50).replace(/[.*+?^${}()|[\]\\]/g, '\\app.post('/chat', async (req, res) => {'), $options: 'i' }
+      });
+      await client.close();
+
+      if (similarFeedback) {
+        return '\n\nFEEDBACK LEARNING: A similar question received negative feedback before. Previous bad response: "' + similarFeedback.badReply.slice(0, 150) + '". Provide a BETTER, more detailed response.';
+      }
+    } catch (e) {}
+
+    return '';
+  } catch (error) {
+    return '';
+  }
+}
+
 app.post('/chat', async (req, res) => {
   try {
     const { messages, patient } = req.body;
@@ -409,13 +547,19 @@ app.post('/chat', async (req, res) => {
     const basePrompt = intentResult.intent === 'STUDY' ? STUDY_PROMPT : SYSTEM_PROMPT;
 
     // Step 6: Build enhanced prompt
+    // Get feedback learning context
+    const feedbackContext = await getFeedbackContext(lastUserMessage);
+    const expandedKnowledge = await searchExpandedKnowledge(lastUserMessage);
+
     const enhancedSystemPrompt =
       basePrompt +
       patientContext +
       longTermContext +
       longTermContext +
   getLanguagePrompt(language) +
-      ragContext;
+      ragContext +
+      feedbackContext +
+      expandedKnowledge;
 
     // Step 7: Get AI response
     const response = await groq.chat.completions.create({
