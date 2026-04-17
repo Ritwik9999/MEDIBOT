@@ -1,152 +1,154 @@
 function PatientPanel({ patient, setPatient, severity }) {
-  const severityData = {
-    normal: { color: "#28a745", label: "Normal", width: "30%", bg: "#d4edda" },
-    moderate: { color: "#fd7e14", label: "Moderate", width: "60%", bg: "#fff3cd" },
-    critical: { color: "#dc3545", label: "Critical", width: "100%", bg: "#f8d7da" },
-  };
-  const s = severityData[severity] || severityData.normal;
+  const isMobile = window.innerWidth <= 900 || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  if (isMobile) return null;
 
-  // ✅ Save patient info to localStorage
-  const handlePatientChange = (field, value) => {
-    const updated = { ...patient, [field]: value };
-    setPatient(updated);
-    localStorage.setItem("medibot_patient", JSON.stringify(updated));
+  const inputStyle = {
+    width: "100%", padding: "10px 14px", borderRadius: 10,
+    border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.06)",
+    color: "#fff", fontSize: 13, boxSizing: "border-box", outline: "none",
+    fontFamily: "var(--font-main)", backdropFilter: "blur(10px)",
+    transition: "all 0.3s ease"
   };
+
+  const labelStyle = {
+    color: "rgba(255,255,255,0.4)", fontSize: 10, fontWeight: 700,
+    letterSpacing: 1.5, marginBottom: 6, textTransform: "uppercase"
+  };
+
+  const severityColor = severity === "critical" ? "#FF6B6B" : severity === "moderate" ? "#FFB347" : "#00D4AA";
+  const severityWidth = severity === "critical" ? "100%" : severity === "moderate" ? "60%" : "30%";
 
   return (
-    <div className="patient-panel" style={{ width: 280, minHeight: "100vh", background: "#fff", borderLeft: "1px solid #e0e0e0", padding: 24, display: "flex", flexDirection: "column", gap: 24, flexShrink: 0, overflowY: "auto" }}>
+    <div className="patient-panel" style={{
+      width: 280, minHeight: "100vh",
+      background: "rgba(255,255,255,0.04)",
+      backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+      borderLeft: "1px solid rgba(255,255,255,0.08)",
+      padding: "24px 16px", overflowY: "auto", flexShrink: 0,
+      position: "relative", zIndex: 2
+    }}>
 
-      {/* Patient Info */}
-      <div>
-        <div style={{ fontSize: 13, fontWeight: "bold", color: "#0a1628", marginBottom: 14, display: "flex", alignItems: "center", gap: 6 }}>
-          👤 Patient Information
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-
-          {/* Full Name */}
-          <div>
-            <label style={{ fontSize: 11, color: "#6c757d", fontWeight: "bold" }}>FULL NAME</label>
-            <input
-              style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 13, marginTop: 4, boxSizing: "border-box", outline: "none" }}
-              placeholder="Enter your name"
-              value={patient.name}
-              onChange={e => handlePatientChange("name", e.target.value)}
-            />
-          </div>
-
-          {/* Age */}
-          <div>
-            <label style={{ fontSize: 11, color: "#6c757d", fontWeight: "bold" }}>AGE</label>
-            <input
-              style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 13, marginTop: 4, boxSizing: "border-box", outline: "none" }}
-              placeholder="Your age"
-              value={patient.age}
-              onChange={e => handlePatientChange("age", e.target.value)}
-            />
-          </div>
-
-          {/* Gender */}
-          <div>
-            <label style={{ fontSize: 11, color: "#6c757d", fontWeight: "bold" }}>GENDER</label>
-            <select
-              style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 13, marginTop: 4, boxSizing: "border-box", outline: "none", background: "#fff" }}
-              value={patient.gender}
-              onChange={e => handlePatientChange("gender", e.target.value)}
-            >
-              <option value="">Select gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
-          {/* ✅ Response Language */}
-          <div>
-            <label style={{ fontSize: 11, color: "#6c757d", fontWeight: "bold" }}>🌍 RESPONSE LANGUAGE</label>
-            <select
-              style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #e0e0e0", fontSize: 13, marginTop: 4, boxSizing: "border-box", outline: "none", background: "#fff" }}
-              value={patient.language || "auto"}
-              onChange={e => handlePatientChange("language", e.target.value)}
-            >
-              <option value="auto">🌐 Auto Detect</option>
-              <option value="english">🇬🇧 English</option>
-              <option value="hindi">🇮🇳 Hindi</option>
-              <option value="bengali">🇧🇩 Bengali</option>
-              <option value="tamil">🇮🇳 Tamil</option>
-              <option value="telugu">🇮🇳 Telugu</option>
-              <option value="gujarati">🇮🇳 Gujarati</option>
-              <option value="malayalam">🇮🇳 Malayalam</option>
-              <option value="punjabi">🇮🇳 Punjabi</option>
-              <option value="kannada">🇮🇳 Kannada</option>
-              <option value="odia">🇮🇳 Odia</option>
-              <option value="urdu">🇵🇰 Urdu</option>
-              <option value="arabic">🇸🇦 Arabic</option>
-              <option value="chinese">🇨🇳 Chinese</option>
-              <option value="japanese">🇯🇵 Japanese</option>
-              <option value="korean">🇰🇷 Korean</option>
-              <option value="spanish">🇪🇸 Spanish</option>
-              <option value="french">🇫🇷 French</option>
-              <option value="german">🇩🇪 German</option>
-              <option value="portuguese">🇧🇷 Portuguese</option>
-              <option value="italian">🇮🇹 Italian</option>
-              <option value="russian">🇷🇺 Russian</option>
-              <option value="turkish">🇹🇷 Turkish</option>
-              <option value="indonesian">🇮🇩 Indonesian</option>
-              <option value="vietnamese">🇻🇳 Vietnamese</option>
-              <option value="thai">🇹🇭 Thai</option>
-              <option value="dutch">🇳🇱 Dutch</option>
-              <option value="greek">🇬🇷 Greek</option>
-              <option value="hebrew">🇮🇱 Hebrew</option>
-              <option value="swahili">🌍 Swahili</option>
-            </select>
-          </div>
-
+      {/* Header */}
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: 10,
+            background: "linear-gradient(135deg, #6C63FF, #00D4AA)",
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16
+          }}>👤</div>
+          <span style={{ color: "#fff", fontSize: 16, fontWeight: 700, fontFamily: "var(--font-display)" }}>
+            Patient Info
+          </span>
         </div>
       </div>
 
+      {/* Form Fields */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={labelStyle}>Full Name</div>
+        <input style={inputStyle} placeholder="Enter your name"
+          value={patient.name || ''} onChange={e => setPatient({ ...patient, name: e.target.value })} />
+      </div>
+
+      <div style={{ marginBottom: 16 }}>
+        <div style={labelStyle}>Age</div>
+        <input style={inputStyle} placeholder="Your age" type="number"
+          value={patient.age || ''} onChange={e => setPatient({ ...patient, age: e.target.value })} />
+      </div>
+
+      <div style={{ marginBottom: 16 }}>
+        <div style={labelStyle}>Gender</div>
+        <select style={{ ...inputStyle, cursor: "pointer" }}
+          value={patient.gender || ''} onChange={e => setPatient({ ...patient, gender: e.target.value })}>
+          <option value="" style={{ background: "#1a1a2e" }}>Select gender</option>
+          <option value="male" style={{ background: "#1a1a2e" }}>Male</option>
+          <option value="female" style={{ background: "#1a1a2e" }}>Female</option>
+          <option value="other" style={{ background: "#1a1a2e" }}>Other</option>
+        </select>
+      </div>
+
+      <div style={{ marginBottom: 24 }}>
+        <div style={labelStyle}>Response Language</div>
+        <select style={{ ...inputStyle, cursor: "pointer" }}
+          value={patient.language || 'auto'} onChange={e => setPatient({ ...patient, language: e.target.value })}>
+          <option value="auto" style={{ background: "#1a1a2e" }}>🌍 Auto Detect</option>
+          <option value="english" style={{ background: "#1a1a2e" }}>🇬🇧 English</option>
+          <option value="hindi" style={{ background: "#1a1a2e" }}>🇮🇳 Hindi</option>
+          <option value="bengali" style={{ background: "#1a1a2e" }}>🇧🇩 Bengali</option>
+          <option value="hinglish" style={{ background: "#1a1a2e" }}>🔀 Hinglish</option>
+          <option value="banglish" style={{ background: "#1a1a2e" }}>🔀 Banglish</option>
+          <option value="spanish" style={{ background: "#1a1a2e" }}>🇪🇸 Spanish</option>
+          <option value="french" style={{ background: "#1a1a2e" }}>🇫🇷 French</option>
+          <option value="arabic" style={{ background: "#1a1a2e" }}>🇸🇦 Arabic</option>
+        </select>
+      </div>
+
       {/* Severity Meter */}
-      <div style={{ background: s.bg, borderRadius: 12, padding: 16 }}>
-        <div style={{ fontSize: 13, fontWeight: "bold", color: "#0a1628", marginBottom: 12 }}>
+      <div style={{
+        background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)",
+        borderRadius: 14, padding: 16, marginBottom: 16
+      }}>
+        <div style={{ color: "#fff", fontSize: 13, fontWeight: 700, marginBottom: 10 }}>
           📊 Symptom Severity
         </div>
-        <div style={{ background: "#e0e0e0", borderRadius: 10, height: 10, overflow: "hidden" }}>
-          <div style={{ width: s.width, height: "100%", background: s.color, borderRadius: 10, transition: "width 0.5s ease" }} />
+        <div style={{ height: 6, background: "rgba(255,255,255,0.1)", borderRadius: 3, overflow: "hidden" }}>
+          <div style={{
+            height: "100%", width: severityWidth,
+            background: `linear-gradient(90deg, ${severityColor}, ${severityColor}88)`,
+            borderRadius: 3, transition: "all 0.5s ease"
+          }} />
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-          <span style={{ fontSize: 11, color: "#28a745" }}>Low</span>
-          <span style={{ fontSize: 12, fontWeight: "bold", color: s.color }}>{s.label}</span>
-          <span style={{ fontSize: 11, color: "#dc3545" }}>Critical</span>
+          <span style={{ color: "#00D4AA", fontSize: 10, fontWeight: 600 }}>Low</span>
+          <span style={{ color: "#FFB347", fontSize: 10, fontWeight: 600 }}>Normal</span>
+          <span style={{ color: "#FF6B6B", fontSize: 10, fontWeight: 600 }}>Critical</span>
         </div>
       </div>
 
       {/* Health Tips */}
-      <div style={{ background: "#f0f4ff", borderRadius: 12, padding: 16 }}>
-        <div style={{ fontSize: 13, fontWeight: "bold", color: "#0a1628", marginBottom: 10 }}>💡 Health Tips</div>
-        {["Drink 8 glasses of water daily", "Sleep 7-8 hours per night", "Exercise 30 mins daily", "Eat balanced meals"].map(tip => (
-          <div key={tip} style={{ fontSize: 12, color: "#444", marginBottom: 6, display: "flex", gap: 6 }}>
-            <span style={{ color: "#0d6efd" }}>•</span> {tip}
+      <div style={{
+        background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)",
+        borderRadius: 14, padding: 16, marginBottom: 16
+      }}>
+        <div style={{ color: "#fff", fontSize: 13, fontWeight: 700, marginBottom: 10 }}>
+          💡 Health Tips
+        </div>
+        {["Drink 8 glasses of water daily", "Sleep 7-8 hours per night", "Exercise 30 mins daily", "Eat balanced meals"].map((tip, i) => (
+          <div key={i} style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, marginBottom: 6, paddingLeft: 12, borderLeft: "2px solid rgba(108,99,255,0.3)" }}>
+            {tip}
           </div>
         ))}
       </div>
 
-      {/* Emergency Button */}
-      <div style={{ background: "#fff5f5", border: "1px solid #f5c6cb", borderRadius: 12, padding: 16 }}>
-        <div style={{ fontSize: 13, fontWeight: "bold", color: "#dc3545", marginBottom: 8 }}>🚨 Emergency</div>
-        <div style={{ fontSize: 11, color: "#666", marginBottom: 12 }}>If you have a medical emergency call immediately</div>
-        <button
-          onClick={() => window.open("tel:112")}
-          style={{ width: "100%", padding: "10px", borderRadius: 8, background: "#dc3545", color: "#fff", border: "none", fontWeight: "bold", fontSize: 13, cursor: "pointer" }}>
+      {/* Emergency */}
+      <div style={{
+        background: "rgba(255,107,107,0.1)", border: "1px solid rgba(255,107,107,0.2)",
+        borderRadius: 14, padding: 16, marginBottom: 16
+      }}>
+        <div style={{ color: "#FF6B6B", fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
+          🚨 Emergency
+        </div>
+        <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 11, marginBottom: 10 }}>
+          If you have a medical emergency call immediately
+        </div>
+        <a href="tel:112" style={{
+          display: "block", textAlign: "center", padding: "10px",
+          background: "linear-gradient(135deg, #FF6B6B, #FF4757)",
+          borderRadius: 10, color: "#fff", fontSize: 14, fontWeight: 700,
+          textDecoration: "none", transition: "all 0.3s ease"
+        }}>
           📞 Call 112
-        </button>
+        </a>
       </div>
 
       {/* Disclaimer */}
-      <div style={{ background: "#fffbeb", border: "1px solid #ffc107", borderRadius: 12, padding: 14 }}>
-        <div style={{ fontSize: 11, color: "#856404", lineHeight: 1.6 }}>
+      <div style={{
+        background: "rgba(255,179,71,0.1)", border: "1px solid rgba(255,179,71,0.15)",
+        borderRadius: 14, padding: 14
+      }}>
+        <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 10, lineHeight: 1.5 }}>
           ⚠️ MediBot provides general health information only. Always consult a qualified doctor for proper medical diagnosis and treatment.
         </div>
       </div>
-
     </div>
   );
 }
