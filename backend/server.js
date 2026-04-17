@@ -400,6 +400,10 @@ app.post('/chat', async (req, res) => {
 
    let reply = response.choices[0].message.content;
 reply = reply.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+// Also handle unclosed think tags
+if (reply.includes('<think>')) {
+  reply = reply.replace(/<think>[\s\S]*/g, '').trim();
+}
 
     res.json({
       reply,
