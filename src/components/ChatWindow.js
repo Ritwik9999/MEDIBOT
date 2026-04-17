@@ -104,22 +104,28 @@ function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
 
-    // Clean text — remove emojis and special chars
-    const cleanText = text.replace(/[^\w\s.,?!-]/g, '').slice(0, 500);
+    // Clean text
+    const cleanText = text.replace(/[^\w\s.,?!-\u0900-\u097F\u0980-\u09FF\u0600-\u06FF]/g, '').slice(0, 500);
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.rate = 0.9;
     utterance.pitch = 1;
     utterance.volume = 1;
 
-    // Try to use a natural voice
+    // Detect language from text and set voice
+    const hasHindi = /[\u0900-\u097F]/.test(text);
+    const hasBengali = /[\u0980-\u09FF]/.test(text);
+    const hasArabic = /[\u0600-\u06FF]/.test(text);
+
+    if (hasHindi) utterance.lang = 'hi-IN';
+    else if (hasBengali) utterance.lang = 'bn-IN';
+    else if (hasArabic) utterance.lang = 'ar-SA';
+    else utterance.lang = 'en-US';
+
+    // Try to find best voice for the language
     const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v =>
-      v.name.includes('Google') ||
-      v.name.includes('Natural') ||
-      v.name.includes('Female')
-    );
-    if (preferred) utterance.voice = preferred;
+    const langVoice = voices.find(v => v.lang.startsWith(utterance.lang.split('-')[0]));
+    if (langVoice) utterance.voice = langVoice;
 
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
@@ -127,7 +133,7 @@ function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
 
     window.speechSynthesis.speak(utterance);
   };
-
+  
   const stopSpeaking = () => {
     window.speechSynthesis.cancel();
     setIsSpeaking(false);
