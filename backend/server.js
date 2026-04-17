@@ -479,7 +479,7 @@ async function getFeedbackContext(message) {
       await client.connect();
       const db = client.db('medibot');
       const similarFeedback = await db.collection('feedback').findOne({
-        question: { $regex: message.slice(0, 50).replace(/[.*+?^${}()|[\]\\]/g, '\\app.post('/chat', async (req, res) => {'), $options: 'i' }
+        question: { $regex: message.slice(0, 50), $options: 'i' }
       });
       await client.close();
 
