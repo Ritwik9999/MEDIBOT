@@ -352,7 +352,7 @@ When a medical student asks a question:
 
 Sources: Harrison Internal Medicine, Robbins Pathology, Guyton Physiology, Davidson Medicine, Bailey and Love Surgery, Nelson Pediatrics, WHO Guidelines
 
-Format: Clear sections. Use simple language but include proper medical terminology. Explain every medical term when first used.
+Format: Use plain text only. NO markdown, NO tables, NO bold, NO headers, NO pipes. Use numbered lists and line breaks for structure. Write in clear paragraphs with numbered points. Keep it readable like a textbook chapter, not a formatted document.
 
 IMPORTANT: Always mention this is for educational purposes only at the end.`;
 
