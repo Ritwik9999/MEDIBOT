@@ -568,7 +568,7 @@ app.post('/chat', async (req, res) => {
         { role: 'system', content: enhancedSystemPrompt },
         ...messages
       ],
-      max_tokens: intentResult.intent === "STUDY" ? 1500 : 600,
+      max_tokens: intentResult.intent === "STUDY" ? 4000 : 800,
       temperature: 0.7,
     });
 
