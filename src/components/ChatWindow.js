@@ -267,7 +267,14 @@ function ChatWindow({ messages, loading, onSend, severity, isMobile }) {
                 boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
                 whiteSpace: "pre-wrap"
               }}>
-                {msg.content}
+                {msg.role === 'assistant' && msg.content.includes('educational purposes') ? (
+                  <>
+                    {msg.content.split('This response is provided for educational purposes')[0]}
+                    <span style={{ color: '#dc3545', fontWeight: 'bold', fontStyle: 'italic', display: 'block', marginTop: 8 }}>
+                      ⚠️ This response is provided for educational purposes only and does not substitute professional medical advice.
+                    </span>
+                  </>
+                ) : msg.content}
                 <div style={{ fontSize: 10, opacity: 0.6, marginTop: 4, textAlign: "right" }}>
                   {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
