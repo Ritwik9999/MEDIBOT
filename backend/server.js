@@ -206,7 +206,8 @@ EMERGENCY - life threatening (chest pain, stroke, not breathing, suicide, overdo
 COMPLEX - chronic conditions (diabetes, cancer, hypertension, surgery, kidney, liver, psychiatric)
 SYMPTOM - general symptoms (fever, headache, cough, cold, nausea, rash, pain, tired)
 MENTAL - mental health (depression, anxiety, stress, sadness, crying, hopeless)
-STUDY - medical education (explain, pathophysiology, mechanism, treatment protocol, diagnosis of, what is, how does, anatomy, pharmacology)
+STUDY - ONLY when user explicitly asks to learn/study medical theory (explain pathophysiology, explain mechanism, explain anatomy, teach me about, study mode). Keywords: explain, pathophysiology, mechanism, anatomy, teach
+MEDICATION - asking about taking medicine, drug interactions, dosage, can I take (can I take, should I take, is it safe to take, medicine for, drug for, tablet for)
 GREETING - hello, hi, how are you, greetings, thanks
 GENERAL - anything else
 
@@ -245,6 +246,12 @@ function selectModelByIntent(intent, complexity, language) {
   if (intent === 'COMPLEX' || complexity === 'HIGH') {
     console.log('🧠 SLOW PATH → DeepSeek R1 — Complex medical');
     return { model: 'openai/gpt-oss-120b', path: 'SLOW' };
+  }
+
+  // 💊 FAST PATH — Medication questions
+  if (intent === 'MEDICATION') {
+    console.log('💊 FAST PATH → LLaMA 3.3 70b — Medication');
+    return { model: 'llama-3.3-70b-versatile', path: 'FAST', reason: 'medication' };
   }
 
   // 📚 SLOW PATH — Medical Study (deep knowledge needed)
